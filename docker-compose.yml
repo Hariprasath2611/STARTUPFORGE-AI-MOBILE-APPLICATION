@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: startupforge-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - startupforge-network
+
+  redis:
+    image: redis:alpine
+    container_name: startupforge-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - startupforge-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: startupforge-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/startupforge
+      - REDIS_URL=redis://redis:6379
+      - FIREBASE_PROJECT_ID=mock-firebase-id
+      - STRIPE_SECRET_KEY=sk_test_mockkey
+      - CLOUDINARY_CLOUD_NAME=mock_cloud
+      - CLOUDINARY_API_KEY=mock_key
+      - CLOUDINARY_API_SECRET=mock_secret
+      - AI_SERVICE_URL=http://ai-service:8000
+      - ML_SERVICE_URL=http://ml-service:8001
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - startupforge-network
+
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: startupforge-ai
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - GEMINI_API_KEY=mock_gemini_key
+      - PINECONE_API_KEY=mock_pinecone_key
+      - PINECONE_ENV=us-west1-gcp
+      - TAVILY_API_KEY=mock_tavily_key
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - startupforge-network
+
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: startupforge-ml
+    ports:
+      - "8001:8001"
+    environment:
+      - PORT=8001
+    networks:
+      - startupforge-network
+
+volumes:
+  mongodb_data:
+  redis_data:
+
+networks:
+  startupforge-network:
+    driver: bridge
