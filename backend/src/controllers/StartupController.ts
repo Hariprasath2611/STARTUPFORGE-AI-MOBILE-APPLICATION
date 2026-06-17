@@ -56,7 +56,7 @@ export const createStartup = async (req: AuthenticatedRequest, res: Response) =>
         startup.growthPotential = mlResponse.data.growth_potential;
         startup.confidenceScore = Math.round(mlResponse.data.confidence_score * 100);
       }
-    } catch (mlErr) {
+    } catch (mlErr: any) {
       console.warn('⚠️ ML Success Predictor offline or failed. Falling back to default calculations.', mlErr.message);
       // fallback math
       startup.successScore = 65;
@@ -128,7 +128,7 @@ export const runStartupAIValidation = async (req: AuthenticatedRequest, res: Res
       startup,
       aiValidationDetails: aiResponse.data
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI Validator Agent failed:', error.message);
     return res.status(500).json({ error: 'AI Validation service is temporarily unavailable' });
   }
