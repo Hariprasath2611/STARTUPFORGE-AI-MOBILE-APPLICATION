@@ -34,7 +34,7 @@ export const generateBusinessPlan = async (req: AuthenticatedRequest, res: Respo
     await startup.save();
 
     return res.status(200).json(businessPlan);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Business plan generation error:', error.message);
     return res.status(500).json({ error: 'Failed to generate business plan through LangChain Agents' });
   }
@@ -63,7 +63,7 @@ export const generateCompetitorAnalysis = async (req: AuthenticatedRequest, res:
     });
 
     return res.status(200).json(aiResponse.data);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Competitor intelligence search error:', error.message);
     return res.status(500).json({ error: 'Failed to generate competitor intelligence reports' });
   }
